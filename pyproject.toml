@@ -1,0 +1,16 @@
+[project]
+name = "rag-tutorial-v2"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "boto3>=1.37.38",
+    "chromadb>=0.5.23",
+    "langchain>=0.0.27",
+    "langchain-community>=0.3.27",
+    "pypdf>=5.9.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
