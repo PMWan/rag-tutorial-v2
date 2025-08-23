@@ -25,10 +25,15 @@ uv add --dev pytest
 ### Running the project
 
 ```bash
-# Run Python scripts with uv
+# Populate the database first
 uv run python populate_database.py
-uv run python query_data.py
+
+# Run Python scripts with uv
+uv run python query_data.py "Your question here"
 uv run python test_rag.py
+
+# Launch web chat interface
+uv run streamlit run web_chat.py
 
 # Or activate the virtual environment
 source .venv/bin/activate
@@ -41,4 +46,5 @@ python populate_database.py
 - **langchain**: RAG framework
 - **chromadb**: Vector database
 - **boto3**: AWS SDK
+- **streamlit**: Web interface
 - **pytest**: Testing framework (dev dependency)
