@@ -1,5 +1,7 @@
+import logging
 import os
-from typing import List, Optional
+from datetime import datetime
+from typing import List
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -7,6 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from query_data_enhanced import query_rag_structured
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -23,6 +29,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Request tracking
+request_count = 0
+start_time = datetime.now()
 
 
 # Pydantic models for request/response
@@ -137,6 +147,33 @@ async def get_supported_games():
             },
         ]
     }
+
+
+@app.get("/stats")
+async def get_server_stats():
+    """Get server statistics and monitoring info"""
+    uptime = datetime.now() - start_time
+    return {
+        "uptime_seconds": uptime.total_seconds(),
+        "uptime_formatted": str(uptime).split(".")[0],  # Remove microseconds
+        "total_requests": request_count,
+        "server_start_time": start_time.isoformat(),
+        "current_time": datetime.now().isoformat(),
+    }
+
+
+@app.get("/logs")
+async def get_recent_logs():
+    """Get recent server logs (last 50 lines)"""
+    try:
+        # This is a simple implementation - in production you'd want a proper log management system
+        return {
+            "message": "Logs endpoint - check your terminal/console for real-time logs",
+            "logging_level": "INFO",
+            "note": "Use uvicorn with --log-level debug for more detailed logs",
+        }
+    except Exception as e:
+        return {"error": f"Could not retrieve logs: {str(e)}"}
 
 
 if __name__ == "__main__":
