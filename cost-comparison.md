@@ -116,5 +116,3 @@
 **Total setup time**: 30 minutes
 **Monthly cost**: $55-125
 **Revenue potential**: $500-5000/month
-
-

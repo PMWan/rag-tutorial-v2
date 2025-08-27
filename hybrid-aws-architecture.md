@@ -35,5 +35,3 @@ Internet → CloudFront → ALB → ECS (API Gateway) → EC2 (Ollama GPU)
 ✅ **Monitoring**: Centralized logging and metrics  
 
 ## Implementation
-
-

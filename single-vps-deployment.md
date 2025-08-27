@@ -26,5 +26,3 @@ Internet → Nginx → RAG API → Ollama (GPU) → ChromaDB
 ```
 
 ## Single VPS Setup
-
-

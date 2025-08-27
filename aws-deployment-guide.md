@@ -178,5 +178,3 @@ Target CPU: 70%
 - [ ] Disaster recovery plan
 - [ ] Cost optimization
 - [ ] Security hardening
-
-

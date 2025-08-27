@@ -213,5 +213,3 @@ async def query_with_tracking(request: QueryRequest, user_id: int = None):
     
     return result
 ```
-
-
