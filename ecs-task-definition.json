@@ -1,0 +1,84 @@
+{
+    "family": "rag-system",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "2048",
+    "executionRoleArn": "arn:aws:iam::YOUR_ACCOUNT:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::YOUR_ACCOUNT:role/ecsTaskRole",
+    "containerDefinitions": [
+        {
+            "name": "api-gateway",
+            "image": "YOUR_ACCOUNT.dkr.ecr.YOUR_REGION.amazonaws.com/rag-api:latest",
+            "portMappings": [
+                {
+                    "containerPort": 8000,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "OLLAMA_HOST",
+                    "value": "YOUR_EC2_PRIVATE_IP:11434"
+                },
+                {
+                    "name": "DATABASE_URL",
+                    "value": "postgresql://raguser:secure_password@YOUR_RDS_ENDPOINT:5432/ragdb"
+                },
+                {
+                    "name": "REDIS_URL",
+                    "value": "redis://YOUR_ELASTICACHE_ENDPOINT:6379"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/rag-system",
+                    "awslogs-region": "YOUR_REGION",
+                    "awslogs-stream-prefix": "api-gateway"
+                }
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost:8000/health || exit 1"
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3,
+                "startPeriod": 60
+            }
+        },
+        {
+            "name": "vectordb",
+            "image": "chromadb/chroma:latest",
+            "portMappings": [
+                {
+                    "containerPort": 8000,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "CHROMA_SERVER_HOST",
+                    "value": "0.0.0.0"
+                },
+                {
+                    "name": "CHROMA_SERVER_HTTP_PORT",
+                    "value": "8000"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/rag-system",
+                    "awslogs-region": "YOUR_REGION",
+                    "awslogs-stream-prefix": "vectordb"
+                }
+            }
+        }
+    ]
+}
+

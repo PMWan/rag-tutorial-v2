@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # API Gateway Service
+  api-gateway:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-ec2-gpu-instance:11434}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://user:pass@db:5432/ragdb}
+      - REDIS_URL=${REDIS_URL:-redis://cache:6379}
+    depends_on:
+      - db
+      - cache
+    networks:
+      - rag-network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # Vector Database Service
+  vectordb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+    networks:
+      - rag-network
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 1G
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=ragdb
+      - POSTGRES_USER=raguser
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-secure_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rag-network
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+
+  # Redis Cache
+  cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - rag-network
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+
+  # Monitoring Service
+  monitoring:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - rag-network
+    deploy:
+      replicas: 1
+
+volumes:
+  chroma_data:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+
+networks:
+  rag-network:
+    driver: bridge
+
+
